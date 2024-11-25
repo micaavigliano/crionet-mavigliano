@@ -1,51 +1,50 @@
 import { ChangeEvent, FormEvent } from "react";
+import { Search } from 'lucide-react';
 
 interface SearchBarProps {
-  title: string;
   placeholder?: string;
   ariaLabel?: string;
   value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: () => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const SearchBar = ({
-  title,
-  placeholder = "Enter search term...",
+  placeholder = "Enter country...",
   ariaLabel = "Search",
   value,
   onChange,
-  onSubmit,
 }: SearchBarProps) => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit();
+  };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (onChange) {
+      onChange(e);
+    }
   };
 
   return (
-    <section className="search-bar-container">
-      <h1 className="text-3xl font-bold text-center pb-9">{title}</h1>
-      <form onSubmit={handleSubmit} className="flex flex-row bg-slate-800 rounded-lg border border-gray-300 items-center justify-between">
-        <label htmlFor="search-input" className="sr-only">
-          {ariaLabel}
+    <div>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-row bg-slate-800 rounded-lg border text-white placeholder-slate-400 items-center justify-between focus-within:ring-2 focus-within:ring-blue-500 px-2"
+        tabIndex={0}
+      >
+        <label htmlFor="search-input" className="flex items-center">
+          <Search className="text-gray-400" />
+          <p className="sr-only">{ariaLabel}</p>
         </label>
         <input
           id="search-input"
           type="text"
           placeholder={placeholder}
-          aria-label={ariaLabel}
           value={value}
-          onChange={onChange}
-          className="text-lg w-1/2 focus:outline-none focus:ring focus:border-blue-300 bg-transparent p-3"
+          onChange={handleChange}
+          className="w-full pl-4 pr-4 py-2 rounded-lg bg-slate-800 outline-none"
         />
-        <button
-          type="submit"
-          className="text-white rounded-lg text-lg hover:bg-blue-700 transition duration-300"
-        >
-          Submit
-        </button>
       </form>
-    </section>
+    </div>
   );
 };
 
