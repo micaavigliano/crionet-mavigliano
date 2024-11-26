@@ -5,6 +5,7 @@ import { GET_CONTINENTS } from '../lib/queries/GET_CONTINENTS';
 import Card from './Components/UI/Card';
 import { breakWords } from '../lib/helper/helper';
 import SearchContainer from './Components/layouts/SearchContainer';
+import Loading from './Components/UI/Loading';
 
 const INITIAL_FILTERS = {
   continent: "",
@@ -43,14 +44,8 @@ function App() {
 
   const filteredAndSortedCountries = useMemo(() => {
     if (!data?.countries) return [];
-
-    // Create a new array from the data to make it mutable
     const countries = JSON.parse(JSON.stringify(data.countries));
-
-    // First filter by language if selected
     let filtered = countries;
-
-    // Then sort the filtered results
     return filtered.sort((a: any, b: any) => {
       const multiplier = sortOrder === 'name-desc' ? -1 : 1;
       return multiplier * a.name.localeCompare(b.name);
@@ -58,7 +53,7 @@ function App() {
   }, [data?.countries, sortOrder]);
 
   return (
-    <main className="px-10 py-5 md:px-24 md:py-10 lg:px-24 lg:py-10">
+    <main className="px-10 py-10 md:px-24 md:py-10 lg:px-24 lg:py-10">
       <h1 className="text-3xl font-bold text-center pb-9">WikiCountry</h1>
       <SearchContainer
         value={searchTerm}
@@ -72,7 +67,7 @@ function App() {
 
       {loading && (
         <div className="flex justify-center my-8">
-          <p>Loading...</p>
+          <Loading />
         </div>
       )}
 

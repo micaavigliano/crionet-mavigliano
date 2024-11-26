@@ -1,5 +1,5 @@
 import { ChangeEvent } from "react";
-import SearchBar from "../Searchbar";
+import SearchBar from "../UI/Searchbar";
 import Select from "../UI/Select";
 import { Filter, ArrowDownUp } from "lucide-react";
 

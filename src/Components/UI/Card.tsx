@@ -16,8 +16,8 @@ const Card = ({ name, emoji, capital, continent, code }: CardProps) => {
         <h2 className="text-3xl">{name}</h2>
       </div>
       <div className="px-2 mt-5">
-        <p className="text-xl">Capital: {capital ? capital : '-'}</p>
-        <p className="text-xl">Continent: {continent}</p>
+        <p className="text-xl"><strong>Capital:</strong> {capital ? capital : 'N/A'}</p>
+        <p className="text-xl"><strong>Continent:</strong> {continent}</p>
         <Link to={`/details/${code}`}>Read more</Link>
       </div>
     </section>
