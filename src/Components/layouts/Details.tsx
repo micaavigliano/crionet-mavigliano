@@ -13,6 +13,7 @@ import { pastelColors } from '../../../lib/helper/helper';
 import Typography from '../UI/Typography';
 import Error from '../UI/Error';
 import Weather from '../UI/Weather';
+import { WeatherProps, CountryProps } from '../../../lib/types/index'
 
 countries.registerLocale(enLocale);
 
@@ -28,8 +29,8 @@ const Details = () => {
     variables: { code: name },
     skip: !name
   });
-  const { loading: weatherLoading, data: weatherData } = useFetch<any>(`https://api.openweathermap.org/data/2.5/weather?q=${dataCountry?.country?.capital}&units=metric&appid=${import.meta.env.VITE_WEATHER_API}`)
-  const { loading, data } = useFetch<any>(`https://restcountries.com/v3.1/alpha/${name}`);
+  const { loading: weatherLoading, data: weatherData } = useFetch<WeatherProps>(`https://api.openweathermap.org/data/2.5/weather?q=${dataCountry?.country?.capital}&units=metric&appid=${import.meta.env.VITE_WEATHER_API}`)
+  const { loading, data } = useFetch<CountryProps[]>(`https://restcountries.com/v3.1/alpha/${name}`);
 
   useEffect(() => {
     if (data?.[0]?.borders) {
@@ -70,17 +71,20 @@ const Details = () => {
           </Typography>
           <Typography as='p' variant='p'>
             <strong>Flag: </strong>{' '}
-            <span aria-label={data[0].flags.alt} className="text-3xl">{country.emoji}</span>
+            <span aria-label={data?.[0].flags.alt} className="text-3xl">{country.emoji}</span>
           </Typography>
           <Typography as='p' variant='p'>
             <strong>Population: </strong>{' '}
-            <span>{data[0].population.toLocaleString('en-US')}</span>
+            <span>{data?.[0].population.toLocaleString('en-US')}</span>
           </Typography>
           <div className="flex flex-row gap-2 items-center flex-wrap">
             <Typography as='p' variant='p'>
               <strong>Time zone: </strong>
-              {data[0].timezones.map((time: string) => (
-                <span>{time}</span>
+              {data?.[0].timezones.map((time: string, index: number) => (
+                <Fragment key={index}>
+                  {index > 0 && ' | '}
+                  {time}
+                </Fragment>
               ))}
             </Typography>
           </div>
@@ -111,10 +115,10 @@ const Details = () => {
             ))}
           </Typography>
           <Weather
-            temperature={weatherData.main?.temp}
-            conditions={weatherData.main?.humidity}
-            icon={weatherData.weather[0].icon}
-            description={weatherData.weather[0].description}
+            temperature={weatherData?.main.temp!}
+            conditions={weatherData?.main.humidity!}
+            icon={weatherData?.weather[0].icon!}
+            description={weatherData?.weather[0].description!}
           />
         </div>
       </section>
