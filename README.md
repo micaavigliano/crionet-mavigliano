@@ -16,6 +16,7 @@ project: https://crionet-mavigliano.vercel.app/
 - Restcountries (REST) API -> I used this API to have information about the neighbouring countries
 
 ## Used technologies:
+- Vite
 - React
 - Typescript
 - GraphQL
