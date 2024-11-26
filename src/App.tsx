@@ -6,6 +6,7 @@ import Card from './Components/UI/Card';
 import { breakWords } from '../lib/helper/helper';
 import SearchContainer from './Components/layouts/SearchContainer';
 import Loading from './Components/UI/Loading';
+import { CountriesProps } from '../lib/types/index'
 
 const INITIAL_FILTERS = {
   continent: "",
@@ -46,7 +47,8 @@ function App() {
     if (!data?.countries) return [];
     const countries = JSON.parse(JSON.stringify(data.countries));
     let filtered = countries;
-    return filtered.sort((a: any, b: any) => {
+    return filtered.sort((a: CountriesProps, b: CountriesProps) => {
+      console.log(a, b)
       const multiplier = sortOrder === 'name-desc' ? -1 : 1;
       return multiplier * a.name.localeCompare(b.name);
     });
@@ -74,7 +76,7 @@ function App() {
       {error && <p>Error: {error.message}</p>}
 
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-        {filteredAndSortedCountries.map((country: any) => (
+        {filteredAndSortedCountries.map((country: CountriesProps) => (
           <li key={country.code}>
             <Card
               emoji={country.emoji}
