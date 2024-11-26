@@ -4,26 +4,32 @@ import { GET_COUNTRY } from '../../../lib/queries/GET_COUNTRY';
 import { GET_BORDERS } from '../../../lib/queries/GET_BORDERS'
 import useFetch from '../../hooks/useFetch';
 import countries from "i18n-iso-countries";
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import enLocale from "i18n-iso-countries/langs/en.json";
+import Loading from '../UI/Loading';
+import { ChevronLeft } from 'lucide-react';
+import Badge from '../UI/Badge';
+import { pastelColors } from '../../../lib/helper/helper';
+import Typography from '../UI/Typography';
+import Error from '../UI/Error';
+import Weather from '../UI/Weather';
 
 countries.registerLocale(enLocale);
 
 const Details = () => {
   const { name } = useParams<{ name: string }>();
   const [iso2Codes, setIso2Codes] = useState<string[]>([]);
-
-  console.log(name)
+  const [colorClasses] = useState(() => {
+    const randomIndex = Math.floor(Math.random() * pastelColors.length);
+    return pastelColors[randomIndex];
+  });
 
   const { loading: countryLoading, error: countryError, data: dataCountry } = useQuery(GET_COUNTRY, {
     variables: { code: name },
     skip: !name
   });
-  console.log(dataCountry)
-
-  //const { loading: weatherLoading, error: weatherError, data: weatherData } = useFetch<any>(`https://api.openweathermap.org/data/2.5/weather?q=${dataCountry?.country?.capital}&appid=${import.meta.env.VITE_WEATHER_API}`)
-  //console.log(weatherData)
-  const { loading, error, data } = useFetch<any>(`https://restcountries.com/v3.1/alpha/${name}`);
+  const { loading: weatherLoading, data: weatherData } = useFetch<any>(`https://api.openweathermap.org/data/2.5/weather?q=${dataCountry?.country?.capital}&units=metric&appid=${import.meta.env.VITE_WEATHER_API}`)
+  const { loading, data } = useFetch<any>(`https://restcountries.com/v3.1/alpha/${name}`);
 
   useEffect(() => {
     if (data?.[0]?.borders) {
@@ -33,44 +39,86 @@ const Details = () => {
     }
   }, [data]);
 
-  const { loading: borderLoading, error: borderError, data: borderData } = useQuery(GET_BORDERS, {
+  const { loading: borderLoading, data: borderData } = useQuery(GET_BORDERS, {
     variables: {
       codes: iso2Codes,
     },
     skip: !iso2Codes.length,
   });
 
-  if (countryLoading || borderLoading || loading) return <p>Loading...</p>;
-  if (countryError) return <p>Error: {countryError.message}</p>;
-  if (!dataCountry?.country) return <p>No country found</p>;
+  if (countryLoading || borderLoading || loading || weatherLoading) return <Loading />;
+  if (countryError) return <Error message={countryError.message} />;
 
   const country = dataCountry.country;
-  console.log(borderData)
 
   return (
-    <section className="p-4">
-      <Link to="/">Go to home</Link>
-      <h1 className="text-4xl">{country.name}</h1>
-      <p className="text-xl mt-4">Capital: {country.capital || '-'}</p>
-      <p className="text-xl mt-4">Continent: {country.continent.name}</p>
-      <span aria-hidden="true" className="text-6xl">{country.emoji}</span>
-      <div className="mt-4">
-        <p className="font-bold">Languages:</p>
-        {country.languages.map((lang: { name: string }, index: number) => (
-          <span key={index} className="mr-2">{lang.name}</span>
-        ))}
-      </div>
-      <p className="mt-4">Currency: {country.currency}</p>
-
-      {borderData?.countries && borderData.countries.length > 0 && (
-        <div className="mt-4">
-          <p className="font-bold">Bordering Countries:</p>
-          {borderData.countries.map((border: { name: string, code: string }) => (
-            <Link to={`/details/${border.code}`} key={border.code} className="mr-2">{border.name}</Link>
-          ))}
+    <main className="p-4">
+      <Link to="/" className='flex flex-row items-center'>
+        <ChevronLeft />
+        <Typography as="span">Go to home</Typography>
+      </Link>
+      <section className="flex flex-col items-center">
+        <Typography as='h1' variant='h1'>{country.name}</Typography>
+        <div className='flex flex-col justify-center items-start mt-10 py-2 px-4 lg:w-fit gap-5'>
+          <Typography as='p' variant='p'>
+            <strong>Capital:</strong>{' '}
+            <span className={`${colorClasses}`}>{country.capital || 'N/A'}</span>
+          </Typography>
+          <Typography as='p' variant='p'>
+            <strong>Continent:</strong>{' '}
+            <span className={`${colorClasses}`}>{country.continent.name}</span>
+          </Typography>
+          <Typography as='p' variant='p'>
+            <strong>Flag: </strong>{' '}
+            <span aria-label={data[0].flags.alt} className="text-3xl">{country.emoji}</span>
+          </Typography>
+          <Typography as='p' variant='p'>
+            <strong>Population: </strong>{' '}
+            <span>{data[0].population.toLocaleString('en-US')}</span>
+          </Typography>
+          <div className="flex flex-row gap-2 items-center flex-wrap">
+            <Typography as='p' variant='p'>
+              <strong>Time zone: </strong>
+              {data[0].timezones.map((time: string) => (
+                <span>{time}</span>
+              ))}
+            </Typography>
+          </div>
+          <div className="flex flex-row gap-2 items-center flex-wrap">
+            <Typography as='p' variant='p'>
+              <strong>Languages:</strong>
+              {country.languages.map((lang: { name: string }, index: number) => (
+                <Badge title={lang.name} key={index} className='ml-3' />
+              ))}
+            </Typography>
+          </div>
+          <Typography as='p' variant='p'>
+            <strong>Currency:</strong>{' '}
+            <span className={`${colorClasses}`}>{country.currency}</span>
+          </Typography>
+          <Typography as='p' variant='p'>
+            <strong>Bordering Countries:</strong>{' '}
+            {borderData?.countries?.map((border: { name: string; code: string }, index: number) => (
+              <Fragment key={border.code}>
+                {index > 0 && ' | '}
+                <Link
+                  to={`/details/${border.code}`}
+                  className="hover:underline"
+                >
+                  {border.name}
+                </Link>
+              </Fragment>
+            ))}
+          </Typography>
+          <Weather
+            temperature={weatherData.main?.temp}
+            conditions={weatherData.main?.humidity}
+            icon={weatherData.weather[0].icon}
+            description={weatherData.weather[0].description}
+          />
         </div>
-      )}
-    </section>
+      </section>
+    </main>
   );
 };
 
